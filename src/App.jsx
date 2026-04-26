@@ -238,85 +238,240 @@ const MEASURE_METRICS = [
   { key: "triglycerides",    label: "Triglycerides",     unit: "mmol/L", colour: "#F39C12", emoji: "🔬",  placeholder: "1.5",  step: "0.1", hasSecond: false },
 ];
 
+// ── Quiz question definitions ─────────────────────────────────────────────
+// Each answer generates tags that activate matching research insights.
+// No hardcoded fibre opinions — scores emerge from the evidence library.
 const QUIZ_STEPS = [
-  { id: "goal", question: "What's your primary goal?", subtitle: "Choose the one that matters most right now.", type: "single", options: [{ value: "regularity", label: "Improve regularity", icon: "🔄" }, { value: "microbiome", label: "Support my microbiome", icon: "🦠" }, { value: "blood_sugar", label: "Balance blood sugar", icon: "📊" }, { value: "cholesterol", label: "Lower cholesterol", icon: "❤️" }, { value: "immunity", label: "Boost immunity", icon: "🛡️" }, { value: "gut_health", label: "General gut health", icon: "🌿" }] },
-  { id: "digestion", question: "How would you describe your digestion?", type: "single", options: [{ value: "loose", label: "Often loose or urgent", icon: "💧" }, { value: "constipated", label: "Often sluggish or constipated", icon: "🐢" }, { value: "gassy", label: "Bloating & gas are my issue", icon: "💨" }, { value: "mixed", label: "Unpredictable — varies a lot", icon: "🔀" }, { value: "fine", label: "Pretty normal overall", icon: "✅" }] },
-  { id: "sensitivity", question: "How does your gut react to new foods?", type: "single", options: [{ value: "very_sensitive", label: "Very sensitive — I react easily", icon: "⚡" }, { value: "somewhat", label: "Somewhat sensitive", icon: "🌊" }, { value: "not_sensitive", label: "Pretty robust, not much bothers me", icon: "🪨" }] },
-  { id: "diet", question: "How would you describe your current diet?", type: "single", options: [{ value: "low_fibre", label: "Low in plants & fibre", icon: "🍔" }, { value: "moderate", label: "Moderate — some veg & wholegrains", icon: "🥗" }, { value: "high_fibre", label: "Already high in fibre", icon: "🌱" }] },
-  { id: "symptoms", question: "Any of these apply to you?", type: "multi", options: [{ value: "ibs", label: "Diagnosed IBS", icon: "🩺" }, { value: "antibiotics", label: "Recent antibiotic use", icon: "💊" }, { value: "metabolic", label: "Metabolic concerns", icon: "📈" }, { value: "immune", label: "Autoimmune condition", icon: "🛡️" }, { value: "none", label: "None of these", icon: "✨" }] },
+  {
+    id: "goal",
+    question: "What's your primary goal?",
+    subtitle: "Your recommendation is built entirely from research matching this goal.",
+    type: "single",
+    options: [
+      { value: "regularity",  label: "Improve regularity",     icon: "🔄", tags: ["regularity","constipation","transit","bowel","stool"] },
+      { value: "microbiome",  label: "Support my microbiome",  icon: "🦠", tags: ["microbiome","diversity","prebiotic","bifidobacterium","bifidogenic","gut flora"] },
+      { value: "blood_sugar", label: "Balance blood sugar",    icon: "📊", tags: ["blood sugar","glucose","insulin","glycaemic","hba1c","diabetes","metabolic"] },
+      { value: "cholesterol", label: "Lower cholesterol",      icon: "❤️", tags: ["cholesterol","ldl","lipid","cardiovascular","bile acid","bsa"] },
+      { value: "immunity",    label: "Boost immunity",         icon: "🛡️", tags: ["immunity","immune","nk cell","inflammation","autoimmune","cytokine"] },
+      { value: "gut_health",  label: "General gut health",     icon: "🌿", tags: ["gut barrier","permeability","mucus","akkermansia","tight junction","butyrate","scfa","colonocyte"] },
+      { value: "weight",      label: "Weight management",      icon: "⚖️", tags: ["weight","obesity","adiposity","satiety","lipid absorption","bmi"] },
+    ],
+  },
+  {
+    id: "digestion",
+    question: "How would you describe your digestion?",
+    subtitle: "This determines which contraindications apply to you.",
+    type: "single",
+    options: [
+      { value: "loose",       label: "Often loose or urgent",           icon: "💧", tags: ["diarrhoea","loose stool","urgency"] },
+      { value: "constipated", label: "Often sluggish or constipated",   icon: "🐢", tags: ["constipation","slow transit","hard stool"] },
+      { value: "gassy",       label: "Bloating & gas are my main issue",icon: "💨", tags: ["gas","bloating","flatulence","fermentation"] },
+      { value: "mixed",       label: "Unpredictable — varies a lot",    icon: "🔀", tags: ["ibs","alternating","mixed bowel"] },
+      { value: "fine",        label: "Pretty normal overall",           icon: "✅", tags: [] },
+    ],
+  },
+  {
+    id: "transit",
+    question: "How often do you have a bowel movement?",
+    subtitle: "Transit time is the strongest single predictor of microbiome composition.",
+    type: "single",
+    options: [
+      { value: "slow",   label: "Less than 3 times per week", icon: "🐌", tags: ["slow transit","constipation","hard stool"] },
+      { value: "normal", label: "Once a day or so",           icon: "✅", tags: ["normal transit"] },
+      { value: "fast",   label: "Multiple times daily",       icon: "⚡", tags: ["fast transit","loose stool","urgency"] },
+    ],
+  },
+  {
+    id: "sensitivity",
+    question: "How does your gut react to new foods?",
+    subtitle: "Determines safe starting fibres and fermentation tolerance.",
+    type: "single",
+    options: [
+      { value: "very_sensitive", label: "Very sensitive — I react easily",      icon: "⚡", tags: ["sensitive gut","sibo","low tolerance","fermentation intolerance"] },
+      { value: "somewhat",       label: "Somewhat sensitive",                   icon: "🌊", tags: ["moderate sensitivity"] },
+      { value: "not_sensitive",  label: "Pretty robust, not much bothers me",   icon: "🪨", tags: ["tolerant","robust gut"] },
+    ],
+  },
+  {
+    id: "fibre_habit",
+    question: "How much fibre do you currently eat?",
+    subtitle: "Habitual fibre intake independently predicts tolerance to new fibres.",
+    type: "single",
+    options: [
+      { value: "low_fibre",  label: "Low — mostly processed foods",      icon: "🍔", tags: ["low habitual intake","fibre naive","western diet"] },
+      { value: "moderate",   label: "Moderate — some veg & wholegrains", icon: "🥗", tags: ["moderate intake"] },
+      { value: "high_fibre", label: "Already very high in fibre",        icon: "🌱", tags: ["high habitual intake","fibre adapted"] },
+    ],
+  },
+  {
+    id: "history",
+    question: "Any of these apply to you?",
+    subtitle: "Select all that apply — these activate specific research insights.",
+    type: "multi",
+    options: [
+      { value: "ibs",        label: "Diagnosed IBS",              icon: "🩺", tags: ["ibs","irritable bowel","gut-brain"] },
+      { value: "antibiotics",label: "Antibiotics in last 6 months",icon: "💊", tags: ["post-antibiotic","dysbiosis","low diversity","microbiome depletion"] },
+      { value: "metabolic",  label: "Metabolic concerns (T2D, obesity)", icon: "📈", tags: ["metabolic","insulin resistance","obesity","type 2 diabetes"] },
+      { value: "immune",     label: "Autoimmune or inflammatory condition", icon: "🛡️", tags: ["autoimmune","inflammation","immune dysregulation"] },
+      { value: "elderly",    label: "Over 65",                    icon: "👴", tags: ["ageing","elderly microbiome","reduced diversity"] },
+      { value: "none",       label: "None of these",              icon: "✨", tags: [] },
+    ],
+  },
+  {
+    id: "model_awareness",
+    question: "One last thing — how do you prefer your evidence?",
+    subtitle: "This affects how we weight in vitro vs human trial findings.",
+    type: "single",
+    options: [
+      { value: "human_only",   label: "Human trials only — I want proven results", icon: "👥", tags: ["human_evidence_only"] },
+      { value: "include_vitro",label: "Include all evidence, noting caveats",       icon: "🔬", tags: ["include_all_evidence"] },
+      { value: "no_pref",      label: "No preference — show me everything",         icon: "📚", tags: [] },
+    ],
+  },
 ];
 
-// GOAL → quiz answer values that map to research insight conditions
-const GOAL_TO_CONDITIONS = {
-  regularity: ["constipation", "regularity", "bowel"],
-  microbiome: ["microbiome", "diversity", "prebiotic", "probiotic"],
-  blood_sugar: ["blood sugar", "glucose", "insulin", "diabetes", "glycaemic"],
-  cholesterol: ["cholesterol", "lipid", "cardiovascular"],
-  immunity: ["immunity", "immune", "inflammation", "autoimmune"],
-  gut_health: ["gut barrier", "permeability", "mucosa", "colon"],
+// ── Evidence scoring constants ──────────────────────────────────────────────
+// Study type base weights — derived from evidence hierarchy
+const STUDY_TYPE_WEIGHTS = {
+  meta_analysis:          4.0,
+  systematic_review:      3.5,
+  rct:                    3.0,
+  human_cohort:           2.0,
+  human_observational:    1.5,
+  ex_vivo:                1.2,
+  animal:                 0.8,
+  in_vitro:               0.5,
+  case_study:             0.3,
+  expert_opinion:         0.2,
 };
 
-function scoreAndRank(ans, insights = [], profileTags = [], expData = {}) {
-  const s = Object.fromEntries(FIBRES.map(f => [f.id, 0]));
-  const { goal, digestion, sensitivity, symptoms } = ans;
+const CONFIDENCE_MULTIPLIERS = { high: 1.5, medium: 1.0, low: 0.5 };
 
-  // ── Base scoring ──────────────────────────────────────────────────────────
-  if (goal === "blood_sugar" || symptoms?.includes("metabolic")) { s.beta_glucan += 4; s.resistant_starch += 3; s.psyllium += 1; }
-  if (goal === "cholesterol") { s.beta_glucan += 4; s.psyllium += 3; s.pectin += 2; }
-  if (goal === "microbiome" || symptoms?.includes("antibiotics")) { s.inulin += 3; s.arabinogalactan += 3; s.resistant_starch += 2; s.pectin += 2; }
-  if (goal === "immunity") { s.arabinogalactan += 4; s.beta_glucan += 2; s.inulin += 1; }
-  if (goal === "gut_health") { s.pectin += 3; s.resistant_starch += 3; s.arabinogalactan += 2; }
-  if (digestion === "loose") { s.psyllium += 3; s.pectin += 2; s.inulin -= 2; }
-  if (digestion === "constipated") { s.psyllium += 3; s.inulin += 2; s.resistant_starch += 2; }
-  if (digestion === "gassy") { s.psyllium += 2; s.inulin -= 3; }
-  if (sensitivity === "very_sensitive") { s.inulin -= 3; s.resistant_starch -= 2; s.psyllium += 2; s.pectin += 2; }
-  if (sensitivity === "not_sensitive") { s.inulin += 2; s.resistant_starch += 2; }
-  if (symptoms?.includes("ibs")) { s.psyllium += 2; s.pectin += 1; s.inulin -= 2; }
-  if (goal === "regularity") { s.psyllium += 3; }
+// Model caveats that should suppress a finding when user wants human evidence only
+const IN_VITRO_MODELS = ["in_vitro", "ex_vivo", "animal"];
 
-  // ── Profile biometric boosting ────────────────────────────────────────────
-  if (profileTags.includes("cholesterol") || profileTags.includes("ldl")) { s.beta_glucan += 2; s.psyllium += 1; s.pectin += 1; }
-  if (profileTags.includes("blood sugar") || profileTags.includes("insulin")) { s.beta_glucan += 2; s.resistant_starch += 2; }
-  if (profileTags.includes("cardiovascular")) { s.beta_glucan += 1; s.psyllium += 1; }
-  if (profileTags.includes("obesity")) { s.resistant_starch += 1; s.pectin += 1; }
+// Calculate evidence score from insight metadata
+function calcEvidenceScore(insight) {
+  const typeWeight = STUDY_TYPE_WEIGHTS[insight.studyType] ?? 1.0;
+  const confMult   = CONFIDENCE_MULTIPLIERS[insight.confidence] ?? 1.0;
+  // Log-scale sample size: ln(n+1) so n=0→0, n=10→2.4, n=100→4.6, n=4000→8.3
+  const sampleFactor = insight.sampleSize > 0
+    ? Math.log(insight.sampleSize + 1) / Math.log(10)  // log10 for gentler scaling
+    : 1.0;
+  return typeWeight * confMult * sampleFactor;
+}
 
-  // ── Research insight boosting ─────────────────────────────────────────────
-  const activeInsights = insights.filter(i => i.active);
-  const goalKeywords = GOAL_TO_CONDITIONS[goal] || [];
-  const allKeywords = [...goalKeywords, ...profileTags];
-  activeInsights.forEach(insight => {
-    const fibreId = insight.fibreId;
-    if (!fibreId || !s.hasOwnProperty(fibreId)) return;
-    const text = (insight.condition + " " + insight.effect + " " + insight.summary).toLowerCase();
-    const relevant = allKeywords.some(kw => text.includes(kw)) ||
-      (digestion === "constipated" && text.includes("constipat")) ||
-      (digestion === "loose" && (text.includes("diarrhoea") || text.includes("loose"))) ||
-      (digestion === "gassy" && (text.includes("gas") || text.includes("bloat"))) ||
-      (symptoms?.includes("ibs") && text.includes("ibs")) ||
-      (symptoms?.includes("metabolic") && (text.includes("glucose") || text.includes("insulin")));
-    if (relevant) {
-      const dir = insight.direction === "negative" ? -1 : 1;
-      const conf = { low: 0.5, medium: 1, high: 1.5 }[insight.confidence] ?? 1;
-      s[fibreId] += dir * conf * 2;
+// Build the complete set of active quiz tags from answers
+function buildQuizTags(answers) {
+  const tags = new Set();
+  QUIZ_STEPS.forEach(step => {
+    const ans = answers[step.id];
+    if (!ans) return;
+    const values = Array.isArray(ans) ? ans : [ans];
+    values.forEach(v => {
+      const opt = step.options.find(o => o.value === v);
+      (opt?.tags || []).forEach(t => tags.add(t.toLowerCase()));
+    });
+  });
+  return tags;
+}
+
+// ── Core scoring function — research-driven, no hardcoded opinions ──────────
+function scoreAndRank(answers, insights = [], profileTags = [], expData = {}) {
+  const scores    = Object.fromEntries(FIBRES.map(f => [f.id, 0]));
+  const evidence  = Object.fromEntries(FIBRES.map(f => [f.id, []])); // trail
+  const penalties = Object.fromEntries(FIBRES.map(f => [f.id, []])); // contraindications
+
+  const quizTags  = buildQuizTags(answers);
+  const allTags   = new Set([...quizTags, ...profileTags.map(t => t.toLowerCase())]);
+
+  const humanOnly = answers.model_awareness === "human_only";
+
+  insights.filter(i => i.active && i.fibreId && scores.hasOwnProperty(i.fibreId)).forEach(insight => {
+    const fid = insight.fibreId;
+
+    // ── CONTRAINDICATION CHECK ──────────────────────────────────────────────
+    // If any of the user's tags match the insight's contraindications → penalty
+    const contraMatched = (insight.contraindicates || []).filter(ct =>
+      allTags.has(ct.toLowerCase())
+    );
+    if (contraMatched.length > 0) {
+      const penalty = calcEvidenceScore(insight) * 1.5; // contraindications weighted harder
+      scores[fid] -= penalty;
+      penalties[fid].push({ insight, matched: contraMatched, penalty });
+      return; // skip relevance check — it's a contraindication
     }
+
+    // ── RELEVANCE CHECK ─────────────────────────────────────────────────────
+    // Insight is relevant if ANY of its relevantFor tags match the user's tags
+    const relevantTags = insight.relevantFor || [];
+    const matched = relevantTags.filter(rt => allTags.has(rt.toLowerCase()));
+
+    // Also do keyword fallback for insights without relevantFor tags (legacy)
+    let keywordMatch = false;
+    if (relevantTags.length === 0) {
+      const text = ((insight.condition||"") + " " + (insight.effect||"") + " " + (insight.summary||"")).toLowerCase();
+      keywordMatch = [...allTags].some(tag => text.includes(tag));
+    }
+
+    if (matched.length === 0 && !keywordMatch) return; // not relevant to this user
+
+    // ── IN VITRO SUPPRESSION ────────────────────────────────────────────────
+    if (humanOnly && IN_VITRO_MODELS.includes(insight.studyType)) {
+      // Don't add to score, but note in evidence trail as suppressed
+      evidence[fid].push({ insight, score: 0, matched, suppressed: true,
+        reason: "Suppressed: in vitro finding (user requested human trials only)" });
+      return;
+    }
+
+    // ── MODEL CAVEAT PENALTY ────────────────────────────────────────────────
+    // In vitro findings get reduced weight even when not suppressed
+    let evidenceScore = calcEvidenceScore(insight);
+
+    // If insight has a modelCaveat flagging in vivo contradiction, halve the score
+    if (insight.modelCaveat && insight.modelCaveat.length > 0) {
+      evidenceScore *= 0.5;
+    }
+
+    const dirMultiplier = insight.direction === "negative" ? -1 : 1;
+    const finalScore = evidenceScore * dirMultiplier;
+
+    // Profile biometric boost: if profile tags overlap relevantFor, 1.3× multiplier
+    const profileBoost = profileTags.some(pt =>
+      relevantTags.some(rt => rt.toLowerCase().includes(pt.toLowerCase()))
+    ) ? 1.3 : 1.0;
+
+    const contribution = finalScore * profileBoost;
+    scores[fid] += contribution;
+    evidence[fid].push({
+      insight,
+      score: contribution,
+      matched: matched.length > 0 ? matched : ["keyword"],
+      evidenceScore,
+      suppressed: false,
+    });
   });
 
-  // ── Personal experience boosting (highest weight — direct user evidence) ──
-  // expData: { [fibreId]: { overall: number(-2..2), positives: string[], negatives: string[] } }
-  // Only applies to kit fibres (those with IDs in FIBRES)
-  Object.entries(expData).forEach(([fibreId, exp]) => {
-    if (!s.hasOwnProperty(fibreId)) return;
+  // ── PERSONAL EXPERIENCE (highest weight override) ───────────────────────
+  Object.entries(expData).forEach(([fid, exp]) => {
+    if (!scores.hasOwnProperty(fid)) return;
     const scaleEntry = EXP_SCALE.find(e => e.value === exp.overall);
     if (!scaleEntry) return;
-    // Overall response is the strongest signal — weight it at 1.5x
-    s[fibreId] += scaleEntry.boost * 1.5;
-    // Positive side-effects are a mild additional boost
-    if (exp.positives?.length) s[fibreId] += Math.min(exp.positives.length, 3) * 0.5;
-    // Negative side-effects are a mild additional penalty
-    if (exp.negatives?.length) s[fibreId] -= Math.min(exp.negatives.length, 3) * 0.5;
+    scores[fid] += scaleEntry.boost * 1.5;
+    if (exp.positives?.length) scores[fid] += Math.min(exp.positives.length, 3) * 0.4;
+    if (exp.negatives?.length) scores[fid] -= Math.min(exp.negatives.length, 3) * 0.4;
   });
 
-  return FIBRES.map(f => ({ ...f, score: s[f.id] })).sort((a, b) => b.score - a.score).slice(0, 3);
+  // Return top 3 with full evidence trail attached
+  return FIBRES
+    .map(f => ({
+      ...f,
+      score:      scores[f.id],
+      evidence:   evidence[f.id].sort((a, b) => Math.abs(b.score) - Math.abs(a.score)),
+      penalties:  penalties[f.id],
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
 }
 
 // ── Experiment config ─────────────────────────────────────────────────────────
@@ -329,6 +484,49 @@ const EXPERIMENT_SCHEDULE = [
   { time: "morning", label: "Morning", icon: "🌅", desc: "Take with breakfast, 30 min before or after eating" },
   { time: "evening", label: "Evening", icon: "🌙", desc: "Take with dinner or 2 hours before bed" },
 ];
+
+// ── Insight extraction system prompt (shared by all AI extraction modes) ──────
+const INSIGHT_EXTRACTION_SYSTEM_PROMPT = `You are a specialist scientific assistant for dietary fibre and gut microbiome research.
+
+Extract a structured insight from the provided text (abstract, full paper, or URL content).
+Return ONLY valid JSON with NO markdown, NO explanation, NO preamble. Just the JSON object.
+
+Required schema:
+{
+  "fibreId": "psyllium|inulin|beta_glucan|resistant_starch|pectin|arabinogalactan",
+  "fibreName": "Human-readable fibre name",
+  "condition": "Clinical conditions, populations, or contexts studied",
+  "effect": "The specific effect or finding observed",
+  "direction": "positive|negative|neutral",
+  "confidence": "low|medium|high",
+  "summary": "2-3 sentence plain-English summary of the finding and its significance",
+  "citation": "Authors et al., Journal Name",
+  "year": "YYYY",
+
+  "studyType": "meta_analysis|systematic_review|rct|human_cohort|human_observational|ex_vivo|animal|in_vitro|case_study|expert_opinion",
+  "sampleSize": 0,
+  "modelType": "Specific model used e.g. batch fermentation, simulated digestion, germ-free mouse, crossover RCT",
+  "modelCaveat": "If in vitro or animal: state why findings may not translate to humans. Empty string if human study.",
+  "contradictedBy": "Note any contradicting evidence mentioned in the paper itself. Empty string if none.",
+
+  "relevantFor": ["array","of","lowercase","tags","that","match","quiz","answers"],
+  "contraindicates": ["tags","where","this","fibre","should","be","avoided"]
+}
+
+For relevantFor and contraindicates, use tags from this controlled vocabulary:
+GOALS: regularity, constipation, transit, bowel, stool, microbiome, diversity, prebiotic, bifidobacterium, bifidogenic, blood sugar, glucose, insulin, glycaemic, hba1c, diabetes, metabolic, cholesterol, ldl, lipid, cardiovascular, bile acid, immunity, immune, nk cell, inflammation, autoimmune, gut barrier, permeability, mucus, akkermansia, tight junction, butyrate, scfa, weight, obesity, satiety
+DIGESTIVE STATE: loose stool, diarrhoea, urgency, constipation, slow transit, hard stool, gas, bloating, flatulence, fermentation, ibs, alternating, mixed bowel
+SENSITIVITY: sensitive gut, sibo, low tolerance, fermentation intolerance, moderate sensitivity, tolerant, robust gut
+HISTORY: low habitual intake, fibre naive, western diet, high habitual intake, fibre adapted, post-antibiotic, dysbiosis, low diversity, insulin resistance, type 2 diabetes, autoimmune, ageing, elderly microbiome
+BIOMETRICS: high ldl, elevated glucose, hypertension, high bmi, cardiovascular risk
+
+CRITICAL RULES:
+1. studyType MUST reflect the actual study design from the Methods section, not the abstract conclusion
+2. If you see phrases like "batch fermentation", "simulated digestion", "germ-free mice", "cell culture" — set studyType to in_vitro, ex_vivo, or animal accordingly
+3. modelCaveat is REQUIRED for any non-human study type — explain specifically why findings may not replicate in vivo
+4. If the paper itself notes that findings contradict other evidence, capture that in contradictedBy
+5. sampleSize should be the number of human subjects (n=) — use 0 for in vitro studies
+6. For contraindicates: if this fibre worsens symptoms in certain populations (e.g. FOS in SIBO), list those tags`;
 
 // ── Admin PIN ─────────────────────────────────────────────────────────────────
 const ADMIN_PIN = "1234"; // Change this to your preferred PIN
@@ -776,11 +974,11 @@ const FIBRE_LOG_SYMPTOMS = ["Gas / bloating", "Loose stools", "Constipation", "C
 // ── STYLES ────────────────────────────────────────────────────────────────────
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#F6F9FC;font-family:'Plus Jakarta Sans',sans-serif;color:#111827;min-height:100vh;}
 .app{max-width:480px;margin:0 auto;padding:16px 16px 94px;}
-.serif{font-family:'Lora',serif;}
+.serif{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;}
 .card{background:#FFFFFF;border:1px solid #E5EAF0;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 1px 6px rgba(17,24,39,.05);}
 .chip{display:inline-block;background:#EFF6FF;color:#2563A0;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin:2px;}
 .chip-g{background:#DCFAEE;color:#15774F;}
@@ -805,7 +1003,7 @@ body{background:#F6F9FC;font-family:'Plus Jakarta Sans',sans-serif;color:#111827
 .bnav-in{display:flex;width:100%;max-width:480px;}
 .nb{flex:1;padding:9px 2px 14px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:9px;font-weight:500;color:#9CA3AF;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
 .nb.on{color:#3B82C4;} .nb .ico{font-size:20px;}
-.timer-num{font-family:'Lora',serif;font-size:58px;font-weight:600;text-align:center;color:#111827;letter-spacing:2px;padding:10px 0 6px;line-height:1;}
+.timer-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:58px;font-weight:600;text-align:center;color:#111827;letter-spacing:2px;padding:10px 0 6px;line-height:1;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes ripple{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -881,7 +1079,7 @@ body{background:#F6F9FC;font-family:'Plus Jakarta Sans',sans-serif;color:#111827
 .exp-bar{height:3px;background:#E5EAF0;border-radius:4px;margin-bottom:20px;}
 .exp-fill{height:100%;background:linear-gradient(90deg,#22A06B,#3B82C4);border-radius:4px;transition:width .4s;}
 /* Research Library */
-.admin-pin-input{width:100%;padding:16px;font-size:28px;font-family:'Lora',serif;text-align:center;border-radius:14px;border:2px solid #E5EAF0;background:#F6F9FC;letter-spacing:8px;outline:none;color:#111827;}
+.admin-pin-input{width:100%;padding:16px;font-size:28px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:center;border-radius:14px;border:2px solid #E5EAF0;background:#F6F9FC;letter-spacing:8px;outline:none;color:#111827;}
 .admin-pin-input:focus{border-color:#3B82C4;}
 .insight-card{background:#FFFFFF;border:1px solid #E5EAF0;border-radius:16px;padding:14px;margin-bottom:10px;position:relative;}
 .insight-card.inactive{opacity:.45;}
@@ -921,7 +1119,7 @@ body{background:#F6F9FC;font-family:'Plus Jakarta Sans',sans-serif;color:#111827
 .reading-carousel::-webkit-scrollbar{display:none;}
 .reading-card{flex-shrink:0;width:270px;border-radius:20px;padding:18px;scroll-snap-align:start;animation:fadeIn .3s ease;}
 .reading-card-cat{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;opacity:.75;margin-bottom:6px;}
-.reading-card-title{font-family:'Lora',serif;font-size:17px;font-weight:600;margin-bottom:8px;line-height:1.3;}
+.reading-card-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:17px;font-weight:600;margin-bottom:8px;line-height:1.3;}
 .reading-card-body{font-size:12.5px;line-height:1.65;opacity:.9;margin-bottom:10px;}
 .reading-card-tags{display:flex;flex-wrap:wrap;gap:5px;}
 .reading-card-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.3);}
@@ -990,7 +1188,16 @@ export default function App() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResults, setAiResults] = useState(null); // extracted insight awaiting approval
   const [aiSearchResults, setAiSearchResults] = useState([]); // list of papers found
-  const [manualForm, setManualForm] = useState({ fibreId: "", condition: "", effect: "", direction: "positive", confidence: "medium", summary: "", citation: "", year: "" });
+  const [manualForm, setManualForm] = useState({
+    fibreId: "", condition: "", effect: "", direction: "positive", confidence: "medium",
+    summary: "", citation: "", year: "",
+    studyType: "rct", sampleSize: 0, modelType: "", modelCaveat: "", contradictedBy: "",
+    relevantFor: [], contraindicates: [],
+  });
+  const [pdfFile, setPdfFile]           = useState(null);
+  const [pdfStatus, setPdfStatus]       = useState(null); // null | reading | extracting
+  const [migrating, setMigrating]       = useState(false);
+  const [migrationProgress, setMigrationProgress] = useState(0);
   const [libFilter, setLibFilter] = useState("all");
 
   // Profile / Biometrics
@@ -1507,9 +1714,9 @@ ${poopLogs.slice(0,20).map(l => `<tr>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are a scientific research assistant specialising in dietary fibre and gut microbiome research. Extract structured data from research abstracts. Always respond with ONLY valid JSON, no markdown, no explanation. The fibreId must be one of: psyllium, inulin, beta_glucan, resistant_starch, pectin, arabinogalactan. If the fibre doesn't match, use the closest one or leave blank.`,
-          messages: [{ role: "user", content: `Extract the key insight from this abstract and return JSON with these exact fields: { "fibreId": "", "fibreName": "", "condition": "", "effect": "", "direction": "positive|negative|neutral", "confidence": "low|medium|high", "summary": "", "citation": "", "year": "" }. Abstract: ${text}` }]
+          max_tokens: 1800,
+          system: INSIGHT_EXTRACTION_SYSTEM_PROMPT,
+          messages: [{ role: "user", content: `Extract the research insight from this text. Return ONLY valid JSON matching the schema exactly.\n\nText:\n${text}` }]
         })
       });
       const data = await res.json();
@@ -1528,10 +1735,10 @@ ${poopLogs.slice(0,20).map(l => `<tr>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
+          max_tokens: 1800,
           tools: [{ type: "web_search_20250305", name: "web_search" }],
-          system: `You are a scientific research assistant. Search for the paper at the given URL or DOI, retrieve its abstract, then extract the key insight. Always respond in your final text block with ONLY valid JSON, no markdown. fibreId must be one of: psyllium, inulin, beta_glucan, resistant_starch, pectin, arabinogalactan.`,
-          messages: [{ role: "user", content: `Fetch this paper and extract the insight as JSON: { "fibreId": "", "fibreName": "", "condition": "", "effect": "", "direction": "positive|negative|neutral", "confidence": "low|medium|high", "summary": "", "citation": "", "year": "" }. URL/DOI: ${url}` }]
+          system: INSIGHT_EXTRACTION_SYSTEM_PROMPT,
+          messages: [{ role: "user", content: `Search for and retrieve this paper, then extract the insight. Return ONLY valid JSON matching the schema.\n\nURL/DOI: ${url}` }]
         })
       });
       const data = await res.json();
@@ -1541,6 +1748,86 @@ ${poopLogs.slice(0,20).map(l => `<tr>
       setAiResults(jsonMatch ? JSON.parse(jsonMatch[0]) : { error: true });
     } catch(e) { setAiResults({ error: true }); }
     setAiLoading(false);
+  }
+
+  // ── PDF extraction ──────────────────────────────────────────────────────
+  async function extractFromPdf(file) {
+    setAiLoading(true); setAiResults(null);
+    setPdfStatus("reading");
+    try {
+      // Read PDF as base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      setPdfStatus("extracting");
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 2000,
+          system: INSIGHT_EXTRACTION_SYSTEM_PROMPT + "\n\nIMPORTANT: This is a FULL TEXT paper, not just an abstract. Read the Methods section carefully to identify the study model (in vitro, in vivo, human RCT etc.). Read the Discussion and Limitations sections for author-stated caveats. The abstract conclusion may not reflect the full nuance of the paper — prioritise what the Methods and Discussion reveal.",
+          messages: [{
+            role: "user",
+            content: [
+              { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } },
+              { type: "text", text: "Extract the key research insight from this full-text paper. Pay special attention to: (1) the study model in Methods, (2) any in vitro vs in vivo limitations, (3) author-stated caveats in Discussion. Return ONLY valid JSON matching the schema exactly." }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      const raw = data.content?.filter(b => b.type === "text").map(b => b.text).join("") || "{}";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      setAiResults(jsonMatch ? JSON.parse(jsonMatch[0]) : { error: true });
+    } catch(e) { console.error(e); setAiResults({ error: true }); }
+    setPdfStatus(null);
+    setAiLoading(false);
+  }
+
+  // ── AI migration: tag all existing insights with new schema fields ──────
+  async function migrateInsight(insight) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 800,
+          system: `You are a scientific research assistant. Given an existing research insight summary, infer the missing schema fields. Return ONLY valid JSON with ONLY these fields: { "relevantFor": [], "contraindicates": [], "studyType": "", "sampleSize": 0, "modelType": "", "modelCaveat": "", "contradictedBy": "" }. studyType must be one of: meta_analysis, systematic_review, rct, human_cohort, human_observational, ex_vivo, animal, in_vitro, case_study, expert_opinion. relevantFor and contraindicates are arrays of lowercase tag strings matching what quiz answers produce.`,
+          messages: [{ role: "user", content: `Infer missing fields for this insight:\n${JSON.stringify({ fibreId: insight.fibreId, condition: insight.condition, effect: insight.effect, summary: insight.summary, citation: insight.citation, confidence: insight.confidence })}` }]
+        })
+      });
+      const data = await res.json();
+      const raw = data.content?.[0]?.text || "{}";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      return jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+    } catch(e) { return {}; }
+  }
+
+  async function runMigration() {
+    setMigrating(true);
+    setMigrationProgress(0);
+    const updated = [...insights];
+    for (let i = 0; i < updated.length; i++) {
+      const ins = updated[i];
+      if (ins.relevantFor && ins.relevantFor.length > 0) {
+        setMigrationProgress(i + 1);
+        continue; // already tagged
+      }
+      const newFields = await migrateInsight(ins);
+      updated[i] = { ...ins, ...newFields };
+      setMigrationProgress(i + 1);
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
+    }
+    setInsights(updated);
+    setMigrating(false);
   }
 
   async function searchPapers(query) {
@@ -1783,74 +2070,110 @@ ${poopLogs.slice(0,20).map(l => `<tr>
           </div>
 
           {/* ── BIG POOP LOG HERO CARD ── */}
-          <div onClick={startSession} style={{ background: "linear-gradient(145deg,#1C3249 0%,#2B5278 60%,#3B82C4 100%)", borderRadius: 24, padding: "22px 20px", marginBottom: 10, cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 6px 24px rgba(37,99,160,.3)" }}>
-            {/* decorative circles */}
-            <div style={{ position: "absolute", right: -24, top: -24, width: 110, height: 110, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
-            <div style={{ position: "absolute", right: 20, bottom: -16, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,.04)" }} />
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-              <div style={{ fontSize: 44, lineHeight: 1, flexShrink: 0 }}>💩</div>
+          <div onClick={startSession} style={{ background: "linear-gradient(145deg,#1C3249 0%,#2B5278 60%,#3B82C4 100%)", borderRadius: 22, padding: "18px 20px", marginBottom: 10, cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 6px 24px rgba(37,99,160,.3)" }}>
+            <div style={{ position: "absolute", right: -20, top: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ fontSize: 38, lineHeight: 1, flexShrink: 0 }}>💩</div>
               <div style={{ flex: 1, color: "white" }}>
-                <div style={{ fontSize: 10, opacity: .65, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 700, marginBottom: 4 }}>Toilet Session</div>
-                <div className="serif" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>Start Timer</div>
-                <div style={{ fontSize: 12, opacity: .75 }}>Log Bristol type, colour &amp; symptoms</div>
+                <div style={{ fontSize: 9, opacity: .6, letterSpacing: 1.3, textTransform: "uppercase", fontWeight: 700, marginBottom: 2 }}>Toilet Session</div>
+                <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>Start Timer</div>
+                <div style={{ fontSize: 11, opacity: .7 }}>Bristol · colour · symptoms · duration</div>
                 {poopLogs.length > 0 && (
-                  <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ padding: "4px 10px", borderRadius: 20, background: "rgba(255,255,255,.15)", fontSize: 11, fontWeight: 600 }}>
-                      Last: {fmtDate(poopLogs[0].date)}
-                      {poopLogs[0].bristolType && ` · Type ${poopLogs[0].bristolType}`}
-                    </div>
+                  <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+                    <span style={{ padding: "3px 9px", borderRadius: 20, background: "rgba(255,255,255,.15)", fontSize: 10, fontWeight: 700 }}>
+                      Last: {fmtDate(poopLogs[0].date)}{poopLogs[0].bristolType ? ` · Type ${poopLogs[0].bristolType}` : ""}
+                    </span>
                   </div>
                 )}
               </div>
+              <div style={{ color: "rgba(255,255,255,.35)", fontSize: 20, flexShrink: 0 }}>›</div>
             </div>
           </div>
 
-          {/* ── WATER + SYMPTOMS ROW ── */}
+          {/* ── WATER + SYMPTOMS TILES (Option C style) ── */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-            {/* Water compact */}
-            <div onClick={() => setScreen("water")} style={{ background: "linear-gradient(145deg,#1D4ED8,#3B82C4)", borderRadius: 18, padding: "14px", cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 3px 12px rgba(59,130,196,.25)" }}>
-              <div style={{ position: "absolute", right: -8, bottom: -8, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
-              <div className="water-glass" style={{ width: 32, height: 44, marginBottom: 8 }}>
-                <div className="water-fill" style={{ height: `${Math.round(waterPct * 100)}%` }} />
-                {ripple && <div className="water-ripple active" />}
-              </div>
+            {/* Water tile */}
+            <div onClick={() => setScreen("water")} style={{ background: "linear-gradient(145deg,#1D4ED8,#3B82C4)", borderRadius: 18, padding: "14px", cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 3px 12px rgba(59,130,196,.22)", minHeight: 110, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ position: "absolute", right: -10, bottom: -10, width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
               <div style={{ color: "white" }}>
-                <div style={{ fontSize: 10, opacity: .7, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", marginBottom: 2 }}>Water</div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>{(todayWaterMl/1000).toFixed(1).replace(/\.0$/,"")}L</div>
-                <div style={{ fontSize: 10, opacity: .7 }}>of {waterGoal/1000}L goal</div>
+                <div style={{ fontSize: 22, marginBottom: 6 }}>💧</div>
+                <div style={{ fontSize: 9, opacity: .65, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>Water</div>
+                <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{(todayWaterMl/1000).toFixed(1).replace(/\.0$/,"")}L</div>
+                <div style={{ fontSize: 10, opacity: .65, marginTop: 2 }}>of {waterGoal/1000}L goal</div>
               </div>
-              <div style={{ display: "flex", gap: 5, marginTop: 8 }}>
-                {[250,500].map(ml => (
-                  <button key={ml} onClick={e=>{e.stopPropagation();addWater(ml);}}
-                    style={{ flex:1, padding:"5px 0", borderRadius:7, border:"1.5px solid rgba(255,255,255,.35)", background:"rgba(255,255,255,.12)", color:"white", fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                    +{ml}
-                  </button>
-                ))}
+              <div>
+                <div style={{ height: 3, background: "rgba(255,255,255,.25)", borderRadius: 2, margin: "8px 0 7px" }}>
+                  <div style={{ height: "100%", width: `${Math.round(waterPct*100)}%`, background: waterPct >= 1 ? "#22A06B" : "white", borderRadius: 2, transition: "width .4s" }} />
+                </div>
+                <div style={{ display: "flex", gap: 5 }}>
+                  {[250,500].map(ml => (
+                    <button key={ml} onClick={e=>{e.stopPropagation();addWater(ml);}}
+                      style={{ flex:1, padding:"5px 0", borderRadius:7, border:"1.5px solid rgba(255,255,255,.3)", background:"rgba(255,255,255,.12)", color:"white", fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                      +{ml}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-            {/* Symptoms compact */}
-            <div onClick={() => { setSymForm({ symptoms: [], severity: {}, notes: "", time: fmtTimeNow() }); setScreen("symptoms"); }} style={{ background: "linear-gradient(145deg,#5B21B6,#7C3AED)", borderRadius: 18, padding: "14px", cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 3px 12px rgba(124,58,237,.25)" }}>
-              <div style={{ position: "absolute", right: -8, bottom: -8, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🫧</div>
+            {/* Symptoms tile */}
+            <div onClick={() => { setSymForm({ symptoms: [], severity: {}, notes: "", time: fmtTimeNow() }); setScreen("symptoms"); }} style={{ background: "linear-gradient(145deg,#5B21B6,#7C3AED)", borderRadius: 18, padding: "14px", cursor: "pointer", position: "relative", overflow: "hidden", boxShadow: "0 3px 12px rgba(124,58,237,.22)", minHeight: 110, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ position: "absolute", right: -10, bottom: -10, width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,.06)" }} />
               <div style={{ color: "white" }}>
-                <div style={{ fontSize: 10, opacity: .7, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", marginBottom: 2 }}>Symptoms</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>Log how you feel</div>
-                {symLogs.length > 0 && <div style={{ fontSize: 10, opacity: .7, marginTop: 2 }}>Last: {fmtDate(symLogs[0].date)}</div>}
+                <div style={{ fontSize: 22, marginBottom: 6 }}>🫧</div>
+                <div style={{ fontSize: 9, opacity: .65, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>Symptoms</div>
+                <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{symLogs.filter(l => l.dateKey === today()).length > 0 ? symLogs.filter(l => l.dateKey === today()).length : symLogs.length > 0 ? "—" : "0"}</div>
+                <div style={{ fontSize: 10, opacity: .65, marginTop: 2 }}>{symLogs.length > 0 ? `last: ${fmtDate(symLogs[0].date || new Date())}` : "none logged"}</div>
+              </div>
+              <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
+                {symLogs.slice(0,3).flatMap(l => l.symptoms?.slice(0,1) || []).map((sid, i) => {
+                  const s = SYMPTOMS.find(x => x.id === sid);
+                  return s ? <span key={i} style={{ fontSize: 16 }}>{s.emoji}</span> : null;
+                })}
+                {symLogs.length === 0 && <span style={{ fontSize: 11, opacity: .6, color: "white" }}>tap to log</span>}
               </div>
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+          {/* ── FEATURE LIST ROWS (Option B style) ── */}
+          <div style={{ background: "#FFFFFF", borderRadius: 18, border: `1px solid ${C.border}`, overflow: "hidden", marginBottom: 10, boxShadow: "0 1px 6px rgba(17,24,39,.04)" }}>
             {[
-              { ico:"🔍", lbl:"Find My Fibre", sub:"5-question quiz", act:() => { setScreen("quiz"); setQuizStep(0); setCurAns(null); setAnswers({}); } },
-              { ico:"🧪", lbl:"My Experience", sub: Object.keys(expData).length > 0 ? Object.keys(expData).length+" fibres rated ✓" : "Rate fibres you've tried", subCol: Object.keys(expData).length > 0 ? C.green : C.muted, act: startExpQuiz },
-              { ico:"📓", lbl:"Fibre Journal",  sub:"Log doses & effects", act:() => setScreen("tracker") },
-              { ico:"📅", lbl:"Calendar",        sub:"All data unified",   act:() => setScreen("calendar") },
-            ].map(({ ico, lbl, sub, subCol, act }) => (
-              <div key={lbl} className="card" style={{ margin: 0, cursor: "pointer", padding: "14px 15px" }} onClick={act}>
-                <div style={{ fontSize: 22, marginBottom: 6 }}>{ico}</div>
-                <div className="serif" style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{lbl}</div>
-                <div className="small" style={{ color: subCol || C.muted }}>{sub}</div>
+              {
+                ico: "🔍", bg: "#EFF6FF",
+                lbl: "Find My Fibre",
+                sub: "Evidence-driven · 7 questions",
+                act: () => { setScreen("quiz"); setQuizStep(0); setCurAns(null); setAnswers({}); }
+              },
+              {
+                ico: "🧪", bg: "#F0FDF4",
+                lbl: "My Experience",
+                sub: Object.keys(expData).length > 0
+                  ? `${Object.keys(expData).length} fibre${Object.keys(expData).length !== 1 ? "s" : ""} rated ✓`
+                  : "Rate fibres you've tried",
+                subCol: Object.keys(expData).length > 0 ? C.green : undefined,
+                act: startExpQuiz
+              },
+              {
+                ico: "📓", bg: "#FFF7ED",
+                lbl: "Fibre Journal",
+                sub: fibreLogs.length > 0 ? `${fibreLogs.length} dose${fibreLogs.length !== 1 ? "s" : ""} logged` : "Log doses & effects",
+                act: () => setScreen("tracker")
+              },
+              {
+                ico: "📅", bg: "#FFFBEB",
+                lbl: "Calendar",
+                sub: "All data in one view",
+                act: () => setScreen("calendar")
+              },
+            ].map(({ ico, bg, lbl, sub, subCol, act }, i, arr) => (
+              <div key={lbl} onClick={act} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px", borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", transition: "background .12s" }}
+                onMouseEnter={e => e.currentTarget.style.background="#F6F9FC"}
+                onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{ico}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{lbl}</div>
+                  <div style={{ fontSize: 11, color: subCol || C.muted, marginTop: 1 }}>{sub}</div>
+                </div>
+                <div style={{ color: "#D1D5DB", fontSize: 18, fontWeight: 600, flexShrink: 0 }}>›</div>
               </div>
             ))}
           </div>
@@ -1858,8 +2181,8 @@ ${poopLogs.slice(0,20).map(l => `<tr>
           {recs.length > 0 && (
             <div className="card" style={{ cursor: "pointer" }} onClick={() => setScreen("results")}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div><div className="small" style={{ marginBottom: 2 }}>Last recommendation</div><div style={{ fontWeight: 500, fontSize: 14 }}>{recs[0].emoji} {recs[0].name}</div></div>
-                <div style={{ color: C.accent, fontSize: 18 }}>→</div>
+                <div><div className="small" style={{ marginBottom: 2 }}>Last recommendation</div><div style={{ fontWeight: 600, fontSize: 14 }}>{recs[0].emoji} {recs[0].name}</div></div>
+                <div style={{ color: C.accent, fontSize: 18 }}>›</div>
               </div>
             </div>
           )}
@@ -1873,7 +2196,7 @@ ${poopLogs.slice(0,20).map(l => `<tr>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
-                    <div className="serif" style={{ fontSize: 15, marginBottom: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2 }}>
                       {profile.name || "Your Profile"}
                     </div>
                     <div className="small">
@@ -2869,26 +3192,71 @@ ${poopLogs.slice(0,20).map(l => `<tr>
               <div style={{ marginBottom: 8 }}><span className="small">Sensitivity: </span><span style={{ fontSize: 13 }}>{f.sensitivity}</span></div>
               <div style={{ marginBottom: 6 }}><div className="small" style={{ marginBottom: 4 }}>Microbial families</div><div>{f.microbes.map(m => <span key={m} className="chip chip-g">{m}</span>)}</div></div>
               <div><div className="small" style={{ marginBottom: 4 }}>Effects to track</div><div>{f.effects.map(e => <span key={e} className="chip">{e}</span>)}</div></div>
-              {/* Research evidence from library */}
-              {(() => {
-                const supporting = insights.filter(i => i.active && i.fibreId === f.id);
-                if (supporting.length === 0) return null;
-                return (
-                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
-                    <div className="small" style={{ marginBottom: 6 }}>📚 Research evidence ({supporting.length})</div>
-                    {supporting.slice(0, 2).map(ins => (
-                      <div key={ins.id} style={{ fontSize: 12, color: C.muted, marginBottom: 5, lineHeight: 1.5 }}>
-                        <span className={`direction-badge ${ins.direction==="positive"?"dir-pos":ins.direction==="negative"?"dir-neg":"dir-neu"}`} style={{ marginRight: 5 }}>
-                          {ins.direction==="positive"?"▲":ins.direction==="negative"?"▼":"●"}
-                        </span>
-                        {ins.summary}
-                        {ins.citation && <span style={{ color: C.blue }}> — {ins.citation}</span>}
-                      </div>
-                    ))}
-                    {supporting.length > 2 && <div className="small">+{supporting.length - 2} more in library</div>}
+              {/* Evidence trail — why this fibre was recommended */}
+              {f.evidence && f.evidence.length > 0 && (
+                <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: C.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>
+                    📊 Why this was recommended
                   </div>
-                );
-              })()}
+                  {f.evidence.filter(e => !e.suppressed).slice(0, 3).map((ev, ei) => {
+                    const ins = ev.insight;
+                    const studyBadge = {
+                      meta_analysis: { label: "Meta-analysis", bg: "#FEF3C7", col: "#92400E" },
+                      systematic_review: { label: "Sys. Review", bg: "#FEF3C7", col: "#92400E" },
+                      rct: { label: "RCT", bg: "#DCFAEE", col: "#15774F" },
+                      human_cohort: { label: "Cohort", bg: "#E8F2FA", col: "#2563A0" },
+                      human_observational: { label: "Observational", bg: "#E8F2FA", col: "#2563A0" },
+                      ex_vivo: { label: "Ex vivo", bg: "#F3F4F6", col: "#6B7280" },
+                      animal: { label: "Animal", bg: "#F3F4F6", col: "#6B7280" },
+                      in_vitro: { label: "In vitro", bg: "#F3F4F6", col: "#6B7280" },
+                    }[ins.studyType] || { label: ins.studyType || "Study", bg: "#F3F4F6", col: "#6B7280" };
+                    return (
+                      <div key={ei} style={{ marginBottom: 10, padding: "10px 12px", borderRadius: 12, background: "#F8FAFC", border: `1px solid ${C.border}` }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 5 }}>
+                          <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: studyBadge.bg, color: studyBadge.col }}>{studyBadge.label}</span>
+                          <span className={`direction-badge ${ins.direction==="positive"?"dir-pos":ins.direction==="negative"?"dir-neg":"dir-neu"}`}>
+                            {ins.direction==="positive"?"▲ Supports":ins.direction==="negative"?"▼ Caution":"● Context"}
+                          </span>
+                          <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 600, background: "#EFF6FF", color: "#2563A0" }}>
+                            {ins.confidence} confidence
+                          </span>
+                          {ins.sampleSize > 0 && <span style={{ fontSize: 10, color: C.muted, padding: "2px 6px" }}>n={ins.sampleSize.toLocaleString()}</span>}
+                        </div>
+                        <div style={{ fontSize: 12, color: C.text, lineHeight: 1.6, marginBottom: ins.modelCaveat ? 5 : 0 }}>{ins.summary}</div>
+                        {ins.modelCaveat && (
+                          <div style={{ fontSize: 11, color: "#92400E", background: "#FEF3C7", borderRadius: 8, padding: "4px 8px", marginTop: 4 }}>
+                            ⚠️ {ins.modelCaveat}
+                          </div>
+                        )}
+                        {ins.citation && <div style={{ fontSize: 11, color: C.muted, marginTop: 4, fontStyle: "italic" }}>{ins.citation}{ins.year ? `, ${ins.year}` : ""}</div>}
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 5 }}>
+                          {(ev.matched || []).slice(0, 3).map(tag => (
+                            <span key={tag} style={{ fontSize: 9, padding: "1px 6px", borderRadius: 10, background: "#E8F2FA", color: "#2563A0" }}>matched: {tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {f.evidence.filter(e => !e.suppressed).length > 3 && (
+                    <div className="small" style={{ color: C.blue }}>+{f.evidence.filter(e => !e.suppressed).length - 3} more supporting insights in library</div>
+                  )}
+                  {f.evidence.filter(e => e.suppressed).length > 0 && (
+                    <div style={{ fontSize: 11, color: C.muted, marginTop: 6, padding: "6px 10px", background: "#F3F4F6", borderRadius: 8 }}>
+                      🔬 {f.evidence.filter(e => e.suppressed).length} in vitro finding{f.evidence.filter(e => e.suppressed).length > 1 ? "s" : ""} suppressed (human trials only mode)
+                    </div>
+                  )}
+                  {f.penalties && f.penalties.length > 0 && (
+                    <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10, background: "#FEE2E2", border: "1px solid #FCA5A5" }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#DC2626", marginBottom: 4 }}>⚠️ Contraindication signals</div>
+                      {f.penalties.map((p, pi) => (
+                        <div key={pi} style={{ fontSize: 11, color: "#991B1B", lineHeight: 1.5 }}>
+                          {p.insight.summary} <span style={{ opacity: .7 }}>— matched: {p.matched.join(", ")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
           })}
@@ -3419,6 +3787,25 @@ ${poopLogs.slice(0,20).map(l => `<tr>
 
           {/* ── LIBRARY TAB ── */}
           {libTab === "library" && <>
+            {/* AI Migration panel */}
+            {insights.filter(i => !i.relevantFor || i.relevantFor.length === 0).length > 0 && !migrating && (
+              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 14, background: "#FEF3C7", border: "1px solid #FCD34D" }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: "#92400E", marginBottom: 4 }}>🔧 {insights.filter(i => !i.relevantFor || i.relevantFor.length === 0).length} insights need tagging</div>
+                <div style={{ fontSize: 12, color: "#78350F", lineHeight: 1.5, marginBottom: 10 }}>These insights were added before the new evidence-driven quiz. Auto-tag them to make them influence recommendations.</div>
+                <button className="btn" style={{ background: "#92400E", color: "white", fontSize: 13, padding: "10px" }} onClick={runMigration}>
+                  🤖 Auto-tag all with AI →
+                </button>
+              </div>
+            )}
+            {migrating && (
+              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 14, background: "#E8F2FA", border: "1px solid #BFDBFE" }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: "#2563A0", marginBottom: 6 }}>🤖 Tagging insights with AI…</div>
+                <div style={{ height: 6, background: "#DBEAFE", borderRadius: 4, marginBottom: 6 }}>
+                  <div style={{ height: "100%", width: `${Math.round((migrationProgress / insights.length) * 100)}%`, background: "#3B82C4", borderRadius: 4, transition: "width .3s" }} />
+                </div>
+                <div className="small">{migrationProgress} of {insights.length} processed</div>
+              </div>
+            )}
             {/* Filter by fibre */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
               <button className={`tog${libFilter==="all"?" on":""}`} style={{ fontSize: 11 }} onClick={() => setLibFilter("all")}>All</button>
@@ -3441,6 +3828,14 @@ ${poopLogs.slice(0,20).map(l => `<tr>
                               {insight.direction === "positive" ? "▲ Supports" : insight.direction === "negative" ? "▼ Caution" : "● Neutral"}
                             </span>
                             <span className={`conf-badge conf-${insight.confidence}`}>{insight.confidence} confidence</span>
+                            {insight.studyType && (
+                              <span style={{ padding: "2px 7px", borderRadius: 20, fontSize: 10, fontWeight: 600, background: ["meta_analysis","systematic_review","rct"].includes(insight.studyType) ? "#DCFAEE" : "#F3F4F6", color: ["meta_analysis","systematic_review","rct"].includes(insight.studyType) ? "#15774F" : "#6B7280" }}>
+                                {insight.studyType.replace(/_/g," ")}
+                              </span>
+                            )}
+                            {insight.sampleSize > 0 && <span style={{ fontSize: 10, color: C.muted }}>n={insight.sampleSize.toLocaleString()}</span>}
+                            {insight.modelCaveat && <span style={{ fontSize: 10, color: "#92400E", background: "#FEF3C7", padding: "2px 6px", borderRadius: 10 }}>⚠️ in vitro</span>}
+                            {(!insight.relevantFor || insight.relevantFor.length === 0) && <span style={{ fontSize: 10, color: "#92400E", background: "#FEF3C7", padding: "2px 6px", borderRadius: 10 }}>⚙️ needs tagging</span>}
                           </div>
                           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 3, color: C.text }}>{insight.condition}</div>
                           <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5, marginBottom: 6 }}>{insight.summary}</div>
@@ -3467,9 +3862,9 @@ ${poopLogs.slice(0,20).map(l => `<tr>
           {/* ── ADD INSIGHT TAB ── */}
           {libTab === "add" && <>
             {/* Mode selector */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              {[["abstract","📄 Paste Abstract"],["url","🔗 URL / DOI"],["manual","✏️ Manual"]].map(([m,l]) => (
-                <button key={m} className={`tog${addMode===m?" on":""}`} style={{ flex: 1, fontSize: 11 }} onClick={() => { setAddMode(m); setAiResults(null); }}>{l}</button>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+              {[["abstract","📄 Abstract"],["pdf","📑 Full PDF"],["url","🔗 URL/DOI"],["manual","✏️ Manual"]].map(([m,l]) => (
+                <button key={m} className={`tog${addMode===m?" on":""}`} style={{ flex: 1, fontSize: 11, minWidth: 70 }} onClick={() => { setAddMode(m); setAiResults(null); setPdfFile(null); setPdfStatus(null); }}>{l}</button>
               ))}
             </div>
 
@@ -3482,6 +3877,52 @@ ${poopLogs.slice(0,20).map(l => `<tr>
                 <button className="btn btn-p" style={{ marginTop: 10 }} onClick={() => extractFromAbstract(abstractText)} disabled={!abstractText.trim() || aiLoading}>
                   {aiLoading ? "Extracting…" : "Extract Insight →"}
                 </button>
+              </div>
+            </>}
+
+            {/* PDF upload mode */}
+            {addMode === "pdf" && <>
+              <div className="card" style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Upload Full-Text PDF</div>
+                <div className="small" style={{ marginBottom: 12, lineHeight: 1.6 }}>
+                  Full text gives significantly better insight quality than abstracts alone. 
+                  The AI reads Methods (study model), Results (effect sizes), and Discussion (author limitations) — 
+                  catching nuances like in vitro caveats that abstracts omit.
+                </div>
+                <div style={{ border: `2px dashed ${pdfFile ? C.green : C.border}`, borderRadius: 14, padding: "20px 14px", textAlign: "center", marginBottom: 12, background: pdfFile ? "#DCFAEE" : "#F6F9FC", transition: "all .2s" }}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f?.type === "application/pdf") setPdfFile(f); }}>
+                  {pdfFile ? (
+                    <>
+                      <div style={{ fontSize: 32, marginBottom: 6 }}>📑</div>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: C.green }}>{pdfFile.name}</div>
+                      <div className="small">{(pdfFile.size / 1024).toFixed(0)} KB · Ready to extract</div>
+                      <button onClick={() => setPdfFile(null)} style={{ marginTop: 8, fontSize: 11, color: C.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Remove</button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 32, marginBottom: 6 }}>📄</div>
+                      <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 4 }}>Drag & drop PDF here</div>
+                      <div className="small" style={{ marginBottom: 10 }}>or click to browse</div>
+                      <label style={{ padding: "8px 16px", borderRadius: 10, background: "#3B82C4", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                        Browse
+                        <input type="file" accept=".pdf,application/pdf" style={{ display: "none" }} onChange={e => { const f = e.target.files[0]; if (f) setPdfFile(f); }} />
+                      </label>
+                    </>
+                  )}
+                </div>
+                {pdfStatus && (
+                  <div className="ai-thinking" style={{ marginBottom: 10 }}>
+                    <span className="spin">⚙️</span>
+                    <span>{pdfStatus === "reading" ? "Reading PDF…" : "Extracting insight from full text…"}</span>
+                  </div>
+                )}
+                <button className="btn btn-p" onClick={() => pdfFile && extractFromPdf(pdfFile)} disabled={!pdfFile || aiLoading} style={{ opacity: (!pdfFile || aiLoading) ? .4 : 1 }}>
+                  {aiLoading ? "Extracting…" : "Extract from Full Paper →"}
+                </button>
+                <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 10, background: C.aLight, fontSize: 11, color: C.aDark, lineHeight: 1.6 }}>
+                  💡 <strong>Why full text matters:</strong> Abstract says "significantly altered microbiome" — full paper Methods says "in vitro batch fermentation model". These are very different claims with different clinical implications.
+                </div>
               </div>
             </>}
 
@@ -3546,8 +3987,43 @@ ${poopLogs.slice(0,20).map(l => `<tr>
                     <input className="inp" placeholder="2024" value={manualForm.year} onChange={e => setManualForm(f => ({ ...f, year: e.target.value }))} />
                   </div>
                 </div>
+                {/* New schema fields */}
+                <div style={{ marginBottom: 10 }}>
+                  <div className="small" style={{ marginBottom: 6 }}>Study type</div>
+                  <select className="inp" value={manualForm.studyType} onChange={e => setManualForm(f => ({ ...f, studyType: e.target.value }))}>
+                    {[["meta_analysis","Meta-analysis"],["systematic_review","Systematic Review"],["rct","RCT"],["human_cohort","Human Cohort"],["human_observational","Observational"],["ex_vivo","Ex vivo"],["animal","Animal"],["in_vitro","In vitro"],["case_study","Case Study"],["expert_opinion","Expert Opinion"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <div className="small" style={{ marginBottom: 4 }}>Sample size (n=)</div>
+                    <input className="inp" type="number" min="0" placeholder="0 for in vitro" value={manualForm.sampleSize || ""} onChange={e => setManualForm(f => ({ ...f, sampleSize: parseInt(e.target.value) || 0 }))} />
+                  </div>
+                  <div style={{ flex: 2 }}>
+                    <div className="small" style={{ marginBottom: 4 }}>Model type</div>
+                    <input className="inp" placeholder="e.g. batch fermentation, crossover RCT" value={manualForm.modelType || ""} onChange={e => setManualForm(f => ({ ...f, modelType: e.target.value }))} />
+                  </div>
+                </div>
+                {["in_vitro","ex_vivo","animal"].includes(manualForm.studyType) && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div className="small" style={{ marginBottom: 4 }}>⚠️ Model caveat (required for non-human studies)</div>
+                    <textarea className="inp" rows={2} placeholder="Why may this finding not translate to humans?" style={{ resize: "none" }} value={manualForm.modelCaveat || ""} onChange={e => setManualForm(f => ({ ...f, modelCaveat: e.target.value }))} />
+                  </div>
+                )}
+                <div style={{ marginBottom: 10 }}>
+                  <div className="small" style={{ marginBottom: 4 }}>Relevant for (comma-separated tags)</div>
+                  <input className="inp" placeholder="e.g. cholesterol, ldl, cardiovascular" value={(manualForm.relevantFor || []).join(", ")} onChange={e => setManualForm(f => ({ ...f, relevantFor: e.target.value.split(",").map(t => t.trim().toLowerCase()).filter(Boolean) }))} />
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <div className="small" style={{ marginBottom: 4 }}>Contraindicated for (comma-separated tags)</div>
+                  <input className="inp" placeholder="e.g. sibo, sensitive gut, fermentation intolerance" value={(manualForm.contraindicates || []).join(", ")} onChange={e => setManualForm(f => ({ ...f, contraindicates: e.target.value.split(",").map(t => t.trim().toLowerCase()).filter(Boolean) }))} />
+                </div>
                 <button className="btn btn-p" disabled={!manualForm.fibreId || !manualForm.condition || !manualForm.summary} style={{ opacity: (!manualForm.fibreId || !manualForm.condition || !manualForm.summary) ? .4 : 1 }}
-                  onClick={() => { addInsight(manualForm); setManualForm({ fibreId: "", condition: "", effect: "", direction: "positive", confidence: "medium", summary: "", citation: "", year: "" }); setLibTab("library"); }}>
+                  onClick={() => {
+                    addInsight(manualForm);
+                    setManualForm({ fibreId: "", condition: "", effect: "", direction: "positive", confidence: "medium", summary: "", citation: "", year: "", studyType: "rct", sampleSize: 0, modelType: "", modelCaveat: "", contradictedBy: "", relevantFor: [], contraindicates: [] });
+                    setLibTab("library");
+                  }}>
                   Save Insight
                 </button>
               </div>
@@ -3563,10 +4039,42 @@ ${poopLogs.slice(0,20).map(l => `<tr>
 
             {/* AI extracted result — awaiting approval */}
             {aiResults && !aiResults.error && !aiLoading && (
-              <div className="card" style={{ border: "2px solid #6B8F71", marginTop: 12 }}>
+              <div className="card" style={{ border: `2px solid ${C.green}`, marginTop: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: C.green }}>✅ Insight Extracted — Review & Approve</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>✅ Insight Extracted — Review & Approve</div>
                 </div>
+                {/* Study type + model type badges */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                  {aiResults.studyType && <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: ["meta_analysis","systematic_review","rct"].includes(aiResults.studyType) ? "#DCFAEE" : "#F3F4F6", color: ["meta_analysis","systematic_review","rct"].includes(aiResults.studyType) ? "#15774F" : "#6B7280" }}>{aiResults.studyType?.replace(/_/g," ")}</span>}
+                  {aiResults.sampleSize > 0 && <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: "#EFF6FF", color: "#2563A0" }}>n = {aiResults.sampleSize.toLocaleString()}</span>}
+                  {aiResults.modelType && <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, background: "#F3F4F6", color: "#6B7280" }}>{aiResults.modelType}</span>}
+                </div>
+                {aiResults.modelCaveat && (
+                  <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 10, background: "#FEF3C7", border: "1px solid #FCD34D", fontSize: 12, color: "#92400E", lineHeight: 1.5 }}>
+                    ⚠️ <strong>Model caveat:</strong> {aiResults.modelCaveat}
+                  </div>
+                )}
+                {aiResults.contradictedBy && (
+                  <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 10, background: "#FEE2E2", border: "1px solid #FCA5A5", fontSize: 12, color: "#991B1B", lineHeight: 1.5 }}>
+                    🔄 <strong>Contradicted by:</strong> {aiResults.contradictedBy}
+                  </div>
+                )}
+                {aiResults.relevantFor?.length > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div className="small" style={{ marginBottom: 4 }}>Will activate for quiz tags:</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {aiResults.relevantFor.map(t => <span key={t} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "#E8F2FA", color: "#2563A0" }}>{t}</span>)}
+                    </div>
+                  </div>
+                )}
+                {aiResults.contraindicates?.length > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div className="small" style={{ marginBottom: 4 }}>Contraindicated for:</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {aiResults.contraindicates.map(t => <span key={t} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "#FEE2E2", color: "#DC2626" }}>{t}</span>)}
+                    </div>
+                  </div>
+                )}
                 {/* Editable preview */}
                 {[
                   ["Fibre", <select className="inp" value={aiResults.fibreId||""} onChange={e => setAiResults(r => ({ ...r, fibreId: e.target.value }))}><option value="">Select…</option>{FIBRES.map(f => <option key={f.id} value={f.id}>{f.emoji} {f.name}</option>)}</select>],
